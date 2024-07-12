@@ -1,3 +1,4 @@
+// src/services/AuthService.ts
 import { BehaviorSubject, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { injectable } from 'tsyringe';
@@ -11,26 +12,29 @@ interface User {
 class AuthService {
 	private users: User[] = []; // Array to store registered users
 	private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+	private currentUserSubject = new BehaviorSubject<string | null>(null);
 	private readonly AUTH_KEY = 'auth_token';
+	private readonly USER_KEY = 'current_user';
 
 	constructor() {
-		// Initialize authentication state from localStorage
 		const isAuthenticated = localStorage.getItem(this.AUTH_KEY) === 'true';
+		const currentUser = localStorage.getItem(this.USER_KEY);
 		this.isAuthenticatedSubject.next(isAuthenticated);
+		this.currentUserSubject.next(currentUser);
 	}
 
 	login(username: string, password: string) {
 		return of({ username }).pipe(
-			delay(1000), // Mock delay to simulate API call
+			delay(1000),
 			map(({ username }) => {
 				const matchedUser = this.users.find(
 					(u) => u.username === username && u.password === password
 				);
 				if (matchedUser) {
-					// Set authentication state to true
 					this.isAuthenticatedSubject.next(true);
-					// Persist authentication state in localStorage
 					localStorage.setItem(this.AUTH_KEY, 'true');
+					localStorage.setItem(this.USER_KEY, username);
+					this.currentUserSubject.next(username);
 					return true;
 				}
 				return false;
@@ -39,34 +43,37 @@ class AuthService {
 	}
 
 	signup(username: string, password: string) {
-		// Check if username is already taken
 		const userExists = this.users.some((u) => u.username === username);
 		if (userExists) {
-			return of(false); // Username already taken
+			return of(false);
 		}
 		this.users.push({ username, password });
 
 		return of(true).pipe(
-			delay(1000), // Mock delay to simulate API call
+			delay(1000),
 			map(() => {
-				// Assume successful registration for demonstration
 				this.isAuthenticatedSubject.next(true);
-				// Persist authentication state in localStorage
 				localStorage.setItem(this.AUTH_KEY, 'true');
+				localStorage.setItem(this.USER_KEY, username);
+				this.currentUserSubject.next(username);
 				return true;
 			})
 		);
 	}
 
 	logout() {
-		// Set authentication state to false
 		this.isAuthenticatedSubject.next(false);
-		// Clear authentication state from localStorage
 		localStorage.removeItem(this.AUTH_KEY);
+		localStorage.removeItem(this.USER_KEY);
+		this.currentUserSubject.next(null);
 	}
 
 	isAuthenticated() {
 		return this.isAuthenticatedSubject.asObservable();
+	}
+
+	getCurrentUser() {
+		return this.currentUserSubject.asObservable();
 	}
 }
 

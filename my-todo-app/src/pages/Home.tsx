@@ -1,5 +1,4 @@
-// src/pages/Home.tsx
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useObservable } from '../hooks/useObservable';
 import { useTodoService } from '../features/todo/TodoProvider';
 import { useAuthService } from '../features/auth/AuthProvider';
@@ -11,8 +10,15 @@ const Home: React.FC = () => {
 	const [text, setText] = useState('');
 	const todoService = useTodoService();
 	const authService = useAuthService();
-	const todos = useObservable(todoService.getTodos());
-	const isAuthenticated = useObservable(authService.isAuthenticated());
+
+	const todosObservable = useMemo(() => todoService.getTodos(), [todoService]);
+	const isAuthenticatedObservable = useMemo(
+		() => authService.isAuthenticated(),
+		[authService]
+	);
+
+	const todos = useObservable(todosObservable);
+	const isAuthenticated = useObservable(isAuthenticatedObservable);
 
 	const handleAddTodo = () => {
 		if (text.trim()) {
@@ -22,7 +28,7 @@ const Home: React.FC = () => {
 	};
 
 	return (
-		<div className='w-full min-h-screen p-4 bg-white shadow-md rounded-md'>
+		<div className='w-full min-h-screen p-4 bg-gray-100 shadow-md rounded-md'>
 			<Header />
 			{isAuthenticated && (
 				<>
@@ -31,7 +37,7 @@ const Home: React.FC = () => {
 						onChange={(e) => setText(e.target.value)}
 						size='3'
 						placeholder='Add new task'
-						mt='7'
+						className='mt-7 w-full p-2 border rounded-md'
 					/>
 					<Button
 						mt='3'
@@ -43,7 +49,7 @@ const Home: React.FC = () => {
 						<Section
 							key={todo.id}
 							size='1'
-							className='mt-4'
+							className='mt-4 p-4 bg-white shadow-md rounded-md'
 						>
 							<TodoItem
 								id={todo.id}
