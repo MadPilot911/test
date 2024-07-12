@@ -1,4 +1,3 @@
-// src/services/AuthService.ts
 import { BehaviorSubject, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { injectable } from 'tsyringe';

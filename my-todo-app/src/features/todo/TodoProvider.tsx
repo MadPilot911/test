@@ -1,4 +1,3 @@
-// src/features/todo/TodoProvider.tsx
 import React, { createContext } from 'react';
 import { container } from 'tsyringe';
 import TodoService from '../../core/services/TodoService';

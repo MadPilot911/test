@@ -1,4 +1,3 @@
-// src/services/TodoService.ts
 import { BehaviorSubject, Observable } from 'rxjs';
 import { injectable, inject } from 'tsyringe';
 import { map } from 'rxjs/operators';
